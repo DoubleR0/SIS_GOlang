@@ -123,20 +123,20 @@ func CallbackHandler(w http.ResponseWriter, r *http.Request) {
 
 	   if cmkl_email == "" {
 		   
-		sqlStatement := `INSERT INTO student (uuid, first_name, last_name, cmkl_email, tokenj, photo) values($1, $2, $3, $4, $5, $6);`
+		sqlStatement := `INSERT INTO student (uuid, first_name, last_name, cmkl_email, photo) values($1, $2, $3, $4, $5);`
 
-		_, err = db.Exec(sqlStatement, 0000, firstname, lastname, mail, rawIDToken, photo)
+		_, err = db.Exec(sqlStatement, 0000, firstname, lastname, mail, photo)
 			if err != nil {
 				panic(err)
 				}
 		fmt.Println("passed")
 	   } else {
-		sqlStatement := `UPDATE student SET tokenj = $1 WHERE cmkl_email = $2;`
+		// sqlStatement := `UPDATE student SET tokenj = $1 WHERE cmkl_email = $2;`
 
-		_, err = db.Exec(sqlStatement, rawIDToken, mail)
-		if err != nil {
-			panic(err)
-			}
+		// _, err = db.Exec(sqlStatement, rawIDToken, mail)
+		// if err != nil {
+		// 	panic(err)
+		// 	}
 		fmt.Println("passed")
 	   }
 

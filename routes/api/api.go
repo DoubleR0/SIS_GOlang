@@ -10,6 +10,7 @@ import(
 	"strings"
 	
 	_ "github.com/lib/pq"
+	"github.com/dgrijalva/jwt-go"
 
 )
 
@@ -81,7 +82,6 @@ const (
 var ProfileApiHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 	var uuid int
-	var token *string
 	var first_name *string
 	var last_name *string
 	var gender *string
@@ -101,9 +101,25 @@ var ProfileApiHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Req
 	var zip *string
 	var country *string
 	var programid *int
-	// id := 109877189
 	ua := r.Header.Get("Authorization")
-	fmt.Println(ua)
+	fmt.Println("")
+	fmt.Println("cilenttoken : ", ua)
+	fmt.Println("")
+
+
+	token, err := jwt.Parse(strings.Split(ua, " ")[1], func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodRSA); !ok {
+			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+		}
+	
+		return []byte("my_secret_key"), nil
+	})
+
+
+	claims := token.Claims.(jwt.MapClaims);
+	fmt.Println("===== claims :", claims["https://omega.auth/email"].(string))
+	fmt.Println("claims passed")
+
  
 	psqlInfo := fmt.Sprintf("host=%s port=%d user=%s "+
 	"password=%s dbname=%s sslmode=%s",
@@ -119,14 +135,14 @@ var ProfileApiHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Req
    panic(err)
    }
  
-   result, err := db.Query(`SELECT * FROM student WHERE tokenj = $1;`, strings.Split(ua, " ")[1])
+   result, err := db.Query(`SELECT * FROM student WHERE cmkl_email = $1;`, claims["https://omega.auth/email"].(string))
 	if err != nil {
 	   panic(err)
 	   log.Fatal(err)
 	   }
  
 	   for result.Next() {
-		  if err := result.Scan(&uuid, &first_name, &last_name, &gender, &photo, &phone_number, &cmkl_email, &canvasid, &airtableid, &personnal_email, &second_email, &token); err != nil {
+		  if err := result.Scan(&uuid, &first_name, &last_name, &gender, &photo, &phone_number, &cmkl_email, &canvasid, &airtableid, &personnal_email, &second_email); err != nil {
 			 log.Fatal(err)
 		  }
 	   }
